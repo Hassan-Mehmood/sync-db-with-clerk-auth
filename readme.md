@@ -1,159 +1,107 @@
-# Step 1:
+# Sync Clerk User Data with Your Database
 
-## Create a new project on clerk
+This repository contains the source code for the Medium article on **[Your Article Title Here]**. It demonstrates how to synchronize user data from [Clerk Authentication](https://clerk.com/) into your own database using Clerk's built-in webhooks.
 
--   We will be using Google Auth only for this tutorial
+The project is split into two parts:
 
-# Step 2:
+-   `frontend/`: A React (Vite + TypeScript) application with Clerk's sign-in components.
+-   `backend/`: An Express.js server set up to receive and verify webhooks from Clerk.
 
-## Setup the Frontend
+---
 
--   We will use ReactJS for this tutorial
--   First we need to setup the react project.
+## 🚀 Project Overview
 
-    -   We will be using vite to setup our react project
-    -   Run this command in the terminal
-    -   `npm create vite@latest your-project-name -- --template react-ts`
-    -   cd your-project-name
-    -   `npm install @clerk/clerk-react@latest`
-    -   `npm run dev`
+The core challenge this project solves is keeping your application's database in sync with your Clerk user base. When a user signs up, updates their profile, or is deleted via Clerk, a webhook is sent to our backend. The backend then verifies the webhook and performs the corresponding action (create, update, delete) in the database.
 
--   Now our project is running on http://localhost:5173
--   We need to set up the clerk auth on the frontend
+### Key Technologies
 
-    -   Create an .env.local file
-    -   Paste your clerk publishable key in .env.local
-    -   Now wrap your App with ClerkProvider
-        -   Open main.tsx
-    -   Use Clerk's built in components to display login and logout buttons
-        -   Open App.tsx
-        -   Use Clerk's built in components to display login and logout buttons
+-   [Clerk](https://clerk.com/) for authentication and webhook events
+-   [React](https://react.dev/) with [Vite](https://vitejs.dev/) for the frontend
+-   [Express.js](https://expressjs.com/) for the backend server
+-   [Svix](https://www.svix.com/) for verifying webhook signatures
+-   [ngrok](https://ngrok.com/) for exposing the local backend to the internet for testing
 
--   With this now you have a basic application with Clerk Auth setup
--   You can signup and login with your google account
+---
 
-# Step 3: Setup the Backend
+## 🛠️ Getting Started
 
--   We will be using ExpressJS for this tutorial
--   Initialize a new project by running `npm init -y`
--   Install express by running `npm install express`
--   Create a new file called index.js - Paste the following code in index.js
+### Prerequisites
 
-```js
-const express = require("express");
+-   [Node.js](https://nodejs.org/en) (v18 or later recommended)
+-   A [Clerk](https://clerk.com/) account
+-   [ngrok](https://ngrok.com/download) installed on your machine
 
-const app = express();
-const port = 3000;
+### 1. Frontend Setup
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-});
+The frontend is a simple React application that uses Clerk's components to handle user sign-up and sign-in.
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-});
-```
+1.  **Navigate to the frontend directory:**
 
--   Install nodemon by running
+    ```bash
+    cd frontend
+    ```
 
-```bash
-npm install nodemon -D
-```
+2.  **Install dependencies:**
 
--   Run the server by running `npm run dev`
--   Now your backend is running on http://localhost:3000
+    ```bash
+    npm install
+    ```
 
-# Step 4: Create endpoints for Clerk Webhooks to call
+3.  **Set up environment variables:**
+    Create a file named `.env.local` in the `frontend` directory and add your Clerk Publishable Key.
 
--   Go to Clerk Dashboard > Configure > Webhooks
-    -   Add a new Endpoint
-    -   [place an image here]
-    -   For the endpoint URL, we need to expose our backend that is running on http://localhost:3000 to the internet using tool called NGROK
-    -   If you don't have ngrok, you need to install it, checkout this video on youtube [https://www.youtube.com/watch?v=aFwrNSfthxU]
-    -   When you are done with installing NGROK, run `ngrok http 3000`, copy that url and paste it in the endpoint URL field
-    -   Subscribe to any events you want.
-    -   We will suscribe to events related to users i.e `user.created`, `user.updated`, `user.deleted`
-    -   Click on the create button
--   Clerk uses "Svix" to send webhooks
--   And we also need to install clerk's sdk for express
--   Run this command to install `npm install svix @clerk/express`
+    ```
+    VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+    ```
 
--   Now we will create an endpoint for clerk webhooks to call
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The application will be available at `http://localhost:5173`.
 
-```js
-const { Webhook } = require("svix");
-const bodyParser = require("body-parser");
+### 2. Backend Setup
 
-app.post("/clerk/webhook", bodyParser.raw({ type: "application/json" }), (req, res) => {
-    const secret = "your-webhook-secret";
+The backend is a lightweight Express server designed to listen for incoming webhooks from Clerk.
 
-    const payload = req.body;
-    const headers = req.headers;
+1.  **Navigate to the backend directory:**
 
-    const wh = new Webhook(secret);
+    ```bash
+    cd backend
+    ```
 
-    let msg;
-    try {
-        msg = wh.verify(payload, headers);
-    } catch (err) {
-        res.status(400).json({});
-    }
+2.  **Install dependencies:**
 
-    console.log("Received webhook:", msg);
+    ```bash
+    npm install
+    ```
 
-    res.json({});
-});
-```
+3.  **Set up environment variables:**
+    Create a file named `.env` in the `backend` directory. You will need to get the Webhook Signing Secret from your Clerk Dashboard after creating an endpoint.
 
--   You can get the webhooks secret by click on your endpoint
--   We need to edit the clerk endpoint url and add /clerk/webhook to the base url because we want only this endpoint to be called
--   In my case the url looks something like this https://280e-2407-d000-508-64cc-599f-8ec-7712-d415.ngrok-free.app/clerk/webhook
--   Now our backend is ready to receive clerk webhooks
--   Go to the frontend and login with a new account that is not singed up with this application
--   You should see a new user created event in the console
+    ```
+    WEBHOOK_SECRET=your_clerk_webhook_signing_secret
+    ```
 
-# Step 5: Store the users in a database
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The server will start on `http://localhost:3000`.
 
--   To store our users into database, we need to first check the type of the event. which we can get from msg.type property.
--   So the code should look something like this
+---
 
-```js
-app.post("/clerk/webhook", bodyParser.raw({ type: "application/json" }), (req, res) => {
-    const secret = "whsec_FYDbj+efepkGa33Pw/3BZMitPm8p0o8f";
+## 📖 Learn More
 
-    const payload = req.body;
-    const headers = req.headers;
+For a complete, step-by-step guide on how this project was built and the concepts behind it, please read the accompanying Medium article:
 
-    const wh = new Webhook(secret);
+**[Link to Your Medium Article Here]**
 
-    let msg;
-    try {
-        msg = wh.verify(payload, headers);
-    } catch (err) {
-        res.status(400).json({});
-    }
+## ✍️ Author
 
-    console.log("Received webhook:", msg);
+Feel free to connect with me!
 
-    switch (msg.type) {
-        case "user.created":
-            // write your logic to handle user creation
-            console.log("Store user data in your database");
-            break;
-        case "user.updated":
-            // write your logic to handle user updates
-            console.log("Update user data in your database");
-            break;
-        case "user.deleted":
-            // write your logic to handle user deletion
-            console.log("Delete user data from your database");
-            break;
-        default:
-            console.log("Unhandled event type:", msg.type);
-            break;
-    }
-
-    res.json({});
-});
-```
+-   **LinkedIn:** [https://www.linkedin.com/in/hassanmehmoodd]
+-   **Twitter/X:** [https://x.com/hassan_mehm00d]
+-   **GitHub:** [https://github.com/Hassan-Mehmood]
 
