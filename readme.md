@@ -1,6 +1,6 @@
 # Sync Clerk User Data with Your Database
 
-This repository contains the source code for the Medium article on **[Your Article Title Here]**. It demonstrates how to synchronize user data from [Clerk Authentication](https://clerk.com/) into your own database using Clerk's built-in webhooks.
+This repository contains the source code for the Medium **[[article](https://medium.com/@hassanmehmood.dev/synchronize-your-database-with-clerk-authentication-using-webhooks-aa6ba56bd8b3)]**. It demonstrates how to synchronize user data from [Clerk Authentication](https://clerk.com/) into your own database using Clerk's built-in webhooks.
 
 The project is split into two parts:
 
@@ -95,7 +95,7 @@ The backend is a lightweight Express server designed to listen for incoming webh
 
 For a complete, step-by-step guide on how this project was built and the concepts behind it, please read the accompanying Medium article:
 
-**[Link to Your Medium Article Here]**
+**[[article](https://medium.com/@hassanmehmood.dev/synchronize-your-database-with-clerk-authentication-using-webhooks-aa6ba56bd8b3)]**
 
 ## ✍️ Author
 
